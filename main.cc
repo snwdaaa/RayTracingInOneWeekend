@@ -4,7 +4,21 @@
 
 #include <iostream>
 
+// 레이와 원이 교차하는지 감지
+bool hit_sphere(const point3& center, double radius, const ray& r) {
+    vec3 oc = center - r.origin(); // C-Q
+    auto a = dot(r.direction(), r.direction()); // d dot d
+    auto b = -2.0 * dot(r.direction(), oc); // -2d dot (C-Q)
+    auto c = dot(oc, oc) - radius * radius; // (C-Q) dot (C-Q) - r^2
+    auto discriminant = b*b - 4*a*c; // 판별식
+    return (discriminant >= 0); // 판별식 0 이상이면 실근 존재 -> 교차
+}
+
 color ray_color(const ray& r) {
+    if (hit_sphere(point3(0, 0, -2), 0.5, r)) { // 중심이 (0, 0, -1), 반지름이 0.5인 원이 레이 r과 충돌하면
+        return color(1, 0, 0); // 붉은색으로 표시
+    }
+
     vec3 unit_direction = unit_vector(r.direction()); // 단위 벡터로 만들기
     auto a = 0.5 * (unit_direction.y() + 1.0);
     return (1.0 - a) * color(1.0, 1.0, 1.0) + a * color(0.5, 0.7, 1.0); // lerp -> a가 1이면 하늘색, 0이면 흰색, 그 사이면 blend
