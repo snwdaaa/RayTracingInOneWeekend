@@ -4,19 +4,27 @@
 
 #include <iostream>
 
-// 레이와 원이 교차하는지 감지
-bool hit_sphere(const point3& center, double radius, const ray& r) {
+// 레이와 구가 교차하는 위치(t) 리턴
+double hit_sphere(const point3& center, double radius, const ray& r) {
     vec3 oc = center - r.origin(); // C-Q
-    auto a = dot(r.direction(), r.direction()); // d dot d
-    auto b = -2.0 * dot(r.direction(), oc); // -2d dot (C-Q)
-    auto c = dot(oc, oc) - radius * radius; // (C-Q) dot (C-Q) - r^2
-    auto discriminant = b*b - 4*a*c; // 판별식
-    return (discriminant >= 0); // 판별식 0 이상이면 실근 존재 -> 교차
+    auto a = r.direction().length_squared(); // d dot d == |d|^2
+    auto h = dot(r.direction(), oc); // h = d dot (C-Q)
+    auto c = oc.length_squared() - radius * radius; // (C-Q) dot (C-Q) - r^2 = |(C-Q)|^2 - r^2
+    auto discriminant = h*h - a*c; // 판별식 h^2 - a*c
+
+    if (discriminant < 0) {
+        return -1.0;
+    }
+    else {
+        return (h - std::sqrt(discriminant)) / a; // 이차방정식 근의 공식 (최적화됨) -> (h - sqrt(h^2 - a*c)) / a
+    }
 }
 
 color ray_color(const ray& r) {
-    if (hit_sphere(point3(0, 0, -2), 0.5, r)) { // 중심이 (0, 0, -1), 반지름이 0.5인 원이 레이 r과 충돌하면
-        return color(1, 0, 0); // 붉은색으로 표시
+    auto t = hit_sphere(point3(0,0,-1), 0.5, r);
+    if (t > 0.0) { // 우선 양수 t에 대해서만 생각
+        vec3 N = unit_vector(r.at(t) - vec3(0,0,-1)); // 구와의 충돌지점에서의 법선벡터
+        return 0.5*color(N.x()+1, N.y()+1, N.z()+1); // 법선 벡터의 위치([-1,1])를 [0,1]로 매핑 후 RGB로 -> 컬러맵
     }
 
     vec3 unit_direction = unit_vector(r.direction()); // 단위 벡터로 만들기
