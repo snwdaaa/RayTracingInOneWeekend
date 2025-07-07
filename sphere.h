@@ -33,7 +33,8 @@ public:
         // 충돌 정보는 hit_record 객체에 레퍼런스로 전달
         rec.t = root;
         rec.p = r.at(rec.t);
-        rec.normal = (rec.p - center) / radius;
+        vec3 outward_normal = (rec.p - center) / radius;
+        rec.set_face_normal(r, outward_normal); // 법선 벡터 방향 결정
 
         return true; // 충돌 O
     }
