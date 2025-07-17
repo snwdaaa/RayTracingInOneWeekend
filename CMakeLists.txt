@@ -1,4 +1,4 @@
-#---------------------------------------------------------------------------------------------------
+﻿#---------------------------------------------------------------------------------------------------
 # CMake Build Configuration for the Ray Tracing Weekend Series
 #
 # See README.md for guidance.
@@ -21,7 +21,7 @@ set ( CMAKE_CXX_EXTENSIONS        OFF )
 
 set ( SOURCE_ONE_WEEKEND
   src/main.cpp
-  #src/camera.h
+  src/camera.h
   src/color.h
   src/hittable.h
   src/hittable_list.h
@@ -117,3 +117,7 @@ add_executable(inOneWeekend      ${SOURCE_ONE_WEEKEND})
 #add_executable(estimate_halfway  src/TheRestOfYourLife/estimate_halfway.cc  )
 #add_executable(sphere_importance src/TheRestOfYourLife/sphere_importance.cc )
 #add_executable(sphere_plot       src/TheRestOfYourLife/sphere_plot.cc       )
+
+# OpenMP 설정
+find_package(OpenMP REQUIRED)
+target_link_libraries(inOneWeekend PRIVATE OpenMP::OpenMP_CXX)

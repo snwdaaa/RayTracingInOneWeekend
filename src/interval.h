@@ -1,4 +1,4 @@
-#ifndef INTERVAL_H
+ï»¿#ifndef INTERVAL_H
 #define INTERVAL_H
 
 class interval {
@@ -8,19 +8,27 @@ class interval {
 	interval() : min(+infinity), max(-infinity) {}
 	interval(double min, double max) : min(min), max(max) {}
 
-	// ±¸°£ Å©±â
+	// êµ¬ê°„ í¬ê¸°
 	double size() const {
 	    return max - min;
 	}
 
-	// x°¡ ±¸°£ ¾È¿¡ ÀÖ´ÂÁö? (¾ç³¡ Æ÷ÇÔ)
+	// xê°€ êµ¬ê°„ ì•ˆì— ìˆëŠ”ì§€? (ì–‘ë í¬í•¨)
 	bool contains(double x) const {
 	    return min <= x && x <= max;
 	}
 
-	// x°¡ ±¸°£ ¾È¿¡ ÀÖ´ÂÁö? (¾ç³¡ Á¦¿Ü)
+	// xê°€ êµ¬ê°„ ì•ˆì— ìˆëŠ”ì§€? (ì–‘ë ì œì™¸)
 	bool surrounds(double x) const {
 	    return min < x && x < max;
+	}
+
+	// xê°€ êµ¬ê°„ ì•ˆì— ìˆëŠ” ê²½ìš°ì—ë§Œ x ë¦¬í„´
+	// min ë˜ëŠ” max ê²½ê³„ë¥¼ ë„˜ì–´ê°€ë©´ ê²½ê³„ê°’ìœ¼ë¡œ ì„¤ì •
+	double clamp(double x) const {
+	    if (x < min) return min;
+	    if (x > max) return max;
+	    return x;
 	}
 
 	static const interval empty, universe;
