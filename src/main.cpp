@@ -1,30 +1,19 @@
-#include "color.h"
-#include "ray.h"
-#include "vec3.h"
+#include "rtWeekend.h"
+#include "interval.h"
+#include "hittable.h"
+#include "hittable_list.h"
+#include "sphere.h"
+#include "image_opener.h"
 
-#include <iostream>
+#include <fstream>
+#include <chrono>
+#include <vector>
 
-// 레이와 구가 교차하는 위치(t) 리턴
-double hit_sphere(const point3& center, double radius, const ray& r) {
-    vec3 oc = center - r.origin(); // C-Q
-    auto a = r.direction().length_squared(); // d dot d == |d|^2
-    auto h = dot(r.direction(), oc); // h = d dot (C-Q)
-    auto c = oc.length_squared() - radius * radius; // (C-Q) dot (C-Q) - r^2 = |(C-Q)|^2 - r^2
-    auto discriminant = h*h - a*c; // 판별식 h^2 - a*c
 
-    if (discriminant < 0) {
-        return -1.0;
-    }
-    else {
-        return (h - std::sqrt(discriminant)) / a; // 이차방정식 근의 공식 (최적화됨) -> (h - sqrt(h^2 - a*c)) / a
-    }
-}
-
-color ray_color(const ray& r) {
-    auto t = hit_sphere(point3(0,0,-1), 0.5, r);
-    if (t > 0.0) { // 우선 양수 t에 대해서만 생각
-        vec3 N = unit_vector(r.at(t) - vec3(0,0,-1)); // 구와의 충돌지점에서의 법선벡터
-        return 0.5*color(N.x()+1, N.y()+1, N.z()+1); // 법선 벡터의 위치([-1,1])를 [0,1]로 매핑 후 RGB로 -> 컬러맵
+color ray_color(const ray& r, const hittable& world) {
+    hit_record rec;
+    if (world.hit(r, interval(0, infinity), rec)) {
+        return 0.5 * (rec.normal + color(1, 1, 1));
     }
 
     vec3 unit_direction = unit_vector(r.direction()); // 단위 벡터로 만들기
@@ -33,6 +22,8 @@ color ray_color(const ray& r) {
 }
 
 int main() {
+    const std::string outputFilename = "image.ppm";
+
     // 레이 트레이싱 기본 흐름
     // 1. 카메라(eye)에서 화면의 픽셀 통과하는 ray 계산
     // 2. 그 ray가 scene의 어떤 오브젝트와 교차하는지 판단
@@ -48,11 +39,16 @@ int main() {
 
     // 이미지
     auto aspect_ratio = 16.0 / 9.0;
-    int image_width = 400;
+    int image_width = 4096;
 
     // 이미지 높이 계산. 1 이상이여야 함
     int image_height = int(image_width / aspect_ratio);
     image_height = (image_height < 1) ? 1 : image_height;
+
+    // 월드
+    hittable_list world; // 모든 hittable한 오브젝트를 저장
+    world.add(make_shared<sphere>(point3(0, 0, -1), 0.5));
+    world.add(make_shared<sphere>(point3(0, -100.5, -1), 100));
 
     // 카메라
     auto focal_length = 1.0;
@@ -70,29 +66,40 @@ int main() {
     auto pixel_delta_u = viewport_u / image_width; // 수평 델타 벡터
     auto pixel_delta_v = viewport_v / image_height; // 수직 델타 벡터
 
-    // 왼쪽 위 픽셀 위치 계산
+    // 왼쪽 위 픽셀 위치 계산 
     // 카메라 센터에서 focal_length만큼 앞으로 간 후(뷰포트에 붙음), 뷰포트 절반만큼 왼쪽으로 & 위쪽으로 이동
     auto viewport_upper_left = camera_center - vec3(0, 0, focal_length) - viewport_u/2 - viewport_v/2;
     // 각 픽셀 중심 -> 뷰포트 왼쪽 위에서 (u + v) 절반만큼 간 위치
     auto pixel100_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
 
     // 렌더
-    std::cout << "P3\n" << image_width << " " << image_height << "\n255\n";
+    std::ofstream out("image.ppm");
+    out << "P3\n" << image_width << " " << image_height << "\n255\n";
 
+    std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
+    std::vector<color>images(image_height * image_width);
+    
     // 위->아래, 왼쪽->오른쪽으로 그림
+    //#pragma omp parallel for schedule(dynamic)
     for (int j = 0; j < image_height; j++) {
-        // 이미지를 std::cout으로 내보내므로, progress indicator는 std::clog로
         std::clog << "\rScanlines remaining: " << (image_height - j) << " " << std::flush;
         for (int i = 0; i < image_width; i++) {
             // 이미지 좌표계 (i, j)를 월드 좌표계로 변환 -> i와 j에 뷰포트의 각 셀 간격을 곱함
             auto pixel_center = pixel100_loc + (i * pixel_delta_u) + (j * pixel_delta_v);
             auto ray_direction = pixel_center - camera_center; // 카메라 센터에서 각 픽셀 센터로 발사하는 레이 방향
             ray r(camera_center, ray_direction); // 코드를 간결하게 하기 위해 ray_direction을 단위 벡터로 만들지 않음
-
-            color pixel_color = ray_color(r);
-            write_color(std::cout, pixel_color);
+            color pixel_color = ray_color(r, world);
+            images[j*image_width+i] = pixel_color;
         }
     }
+    std::chrono::duration<double>sec = std::chrono::system_clock::now() - start;
+    std::cout << "Render time : " << sec.count() << "seconds" << std::endl;
+
+    // images 벡터에 색상 값 다 넣어놓고 한 번에 쓰기
+    write_color(images, out);
 
     std::clog << "\rDone                    \n";
+
+    out.close();
+    openImage(outputFilename); // 이미지 자동 실행
 }

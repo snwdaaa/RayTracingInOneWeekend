@@ -20,17 +20,17 @@ set ( CMAKE_CXX_EXTENSIONS        OFF )
 #)
 
 set ( SOURCE_ONE_WEEKEND
-  main.cc
-  #camera.h
-  #color.h
-  #hittable.h
-  #hittable_list.h
-  #interval.h
-  #material.h
-  #ray.h
-  #rtweekend.h
-  #sphere.h
-  vec3.h
+  src/main.cpp
+  #src/camera.h
+  src/color.h
+  src/hittable.h
+  src/hittable_list.h
+  src/interval.h
+  #src/material.h
+  src/ray.h
+  src/rtweekend.h
+  src/sphere.h
+  src/vec3.h
 )
 
 #set ( SOURCE_NEXT_WEEK

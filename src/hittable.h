@@ -1,8 +1,6 @@
 #ifndef HITTABLE_H
 #define HITTABLE_H
 
-#include "ray.h"
-
 // hit 정보
 class hit_record {
 public:
@@ -24,7 +22,7 @@ public:
 class hittable {
 public:
     virtual ~hittable() = default;
-    virtual bool hit(const ray& r, double ray_tmin, double ray_tmax, hit_record& rec) const = 0; // 레이와 오브젝트의 hit 여부를 판단할 메서드
+    virtual bool hit(const ray& r, interval ray_t, hit_record& rec) const = 0; // 레이와 오브젝트의 hit 여부를 판단할 메서드
 };
 
 #endif
