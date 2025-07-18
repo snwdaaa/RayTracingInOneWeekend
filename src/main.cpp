@@ -1,4 +1,4 @@
-#include "rtWeekend.h"
+﻿#include "rtWeekend.h"
 #include "interval.h"
 #include "hittable.h"
 #include "hittable_list.h"
@@ -17,6 +17,7 @@ int main() {
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 4096;
     cam.samples_per_pixel = 100;
+    cam.max_depth = 50;
 
     cam.render(world); // hittable_list에 있는 모든 물체에 대해 렌더링
 }

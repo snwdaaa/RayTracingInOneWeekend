@@ -1,4 +1,4 @@
-#ifndef VEC3_H
+﻿#ifndef VEC3_H
 #define VEC3_H
 
 class vec3 {
@@ -40,6 +40,15 @@ class vec3 {
 
         double length_squared() const {
             return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
+        }
+
+        // 랜덤 방향 벡터 생성
+        static vec3 random() {
+            return vec3(random_double(), random_double(), random_double());
+        }
+
+        static vec3 random(double min, double max) {
+            return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
         }
 };
 
@@ -87,6 +96,32 @@ inline vec3 cross(const vec3& u, const vec3& v) {
 
 inline vec3 unit_vector(const vec3& v) {
     return v / v.length();
+}
+
+// 단위원을 감싸는 큐브 내에서 랜덤한 벡터 생성
+// 단위원 안에 있다면 accept -> normalize
+// 단위원 밖에 있다면 reject
+inline vec3 random_unit_vector() {
+    while (true) {
+        auto p = vec3::random(-1, 1); // 랜덤 벡터 
+        auto lensq = p.length_squared();
+        // 매우 작은 float는 제곱하면 0이 될 수 있음
+        // 1e-160보다 작은 수는 무시해서 sqrt(0)이 실행되지 않게 함
+        if (1e-160 < lensq && lensq <= 1) { // 벡터가 단위원 안에 있으면
+            return p / sqrt(lensq); // 정규화 (단위 벡터로 만듦)
+        }
+    }
+}
+
+// 법선 벡터와의 내적을 통해 올바른 hemisphere에 있는지 확인
+// 내적값 > 0 -> OK
+// 내적값 < 0 -> invert
+inline vec3 random_on_hemisphere(const vec3& normal) {
+    vec3 on_unit_sphere = random_unit_vector(); // 랜덤 벡터 생성
+    if (dot(on_unit_sphere, normal) > 0.0) // 법선과 같은 hemisphere에 있음
+        return on_unit_sphere;
+    else
+        return -on_unit_sphere;
 }
 
 #endif

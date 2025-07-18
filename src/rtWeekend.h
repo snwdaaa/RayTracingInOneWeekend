@@ -29,7 +29,7 @@ inline double degrees_to_radians(double degrees) {
 
 inline double random_double() {
     // [0,1)에서 랜덤한 실수 리턴
-    return std::rand() / (RAND_MAX + 1.0);
+    return std::rand() / (RAND_MAX + 1.0); // 1이 되지 않게 하기 위해 + 1.0
 }
 
 inline double random_double(double min, double max) {

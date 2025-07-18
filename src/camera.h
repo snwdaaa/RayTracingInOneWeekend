@@ -55,16 +55,29 @@ private:
 	    + 0.5 * (pixel_delta_u + pixel_delta_v);
     }
 
-    color ray_color(const ray& r, const hittable& world) const {
+    color ray_color(const ray& r, int depth, const hittable& world) const {
+	// 최대 depth 이상으로 반사되지 않게 함
+	if (depth <= 0)
+	    return color(0, 0, 0);
+
 	hit_record rec;
 
 	// 물체에 충돌한 경우
-	if (world.hit(r, interval(0, infinity), rec)) {
-	    // 법선 벡터로 색 결정 (임시)
-	    return 0.5 * (rec.normal + color(1, 1, 1));
+	if (world.hit(r, interval(0.001, infinity), rec)) {
+	    // Simple Diffuse
+	    // 충돌 지점의 법선 벡터가 속한 반구에서 랜덤 방향의 벡터 가져옴
+	    //vec3 direction = random_on_hemisphere(rec.normal);
+	    
+	    // True Lambertian Reflection
+	    // 충돌 지점의 법선 벡터 주변으로 랜덤한 단위 벡터를 더함
+	    vec3 direction = rec.normal + random_unit_vector();
+
+	    // 충돌 지점에서 랜덤한 방향으로 다시 한 번 재귀적으로 레이 발사
+	    // 0.5를 곱해 50%의 색상만 반사되도록 함
+	    return 0.5 * ray_color(ray(rec.p, direction), depth-1, world);
 	}
 
-	// 물체에 충돌하지 않은 경우
+	// 물체에 충돌하지 않은 경우 배경색 그림
 	vec3 unit_direction = unit_vector(r.direction());
 	auto a = 0.5 * (unit_direction.y() + 1.0);
 	// lerp
@@ -96,6 +109,7 @@ public:
     double aspect_ratio = 16.0 / 9.0; // 종횡비
     int image_width = 4096; // 가로 픽셀 개수
     int samples_per_pixel = 10; // 픽셀 당 랜덤 샘플 개수
+    int max_depth = 10; // 레이 반사 재귀호출 최대 depth
 
     // 렌더 준비 & 렌더 루프 실행
     void render(const hittable& world) {
@@ -134,7 +148,7 @@ public:
 		color pixel_color(0, 0, 0);
 		for (int sample = 0; sample < samples_per_pixel; sample++) {
 		    ray r = get_ray(i, j); // 픽셀 정사각형 내에서 랜덤 샘플링
-		    pixel_color += ray_color(r, world);
+		    pixel_color += ray_color(r, max_depth, world);
 		}
 		pixel_color *= pixel_samples_scale; // 평균 구하기
 		images[j * image_width + i] = pixel_color;
