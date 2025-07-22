@@ -5,12 +5,22 @@
 #include "sphere.h"
 #include "image_opener.h"
 #include "camera.h"
+#include "material.h"
 
 int main() {
     // 월드
     hittable_list world; // 모든 hittable한 오브젝트를 저장
-    world.add(make_shared<sphere>(point3(0, 0, -1), 0.5));
-    world.add(make_shared<sphere>(point3(0, -100.5, -1), 100));
+
+    // 물체에 사용할 머티리얼
+    auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
+    auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
+    auto material_left = make_shared<metal>(color(0.8, 0.8, 0.8), 0.3);
+    auto material_right = make_shared<metal>(color(0.8, 0.6, 0.2), 1.0);
+
+    world.add(make_shared<sphere>(point3(0.0, -100.5, -1.0), 100.0, material_ground));
+    world.add(make_shared<sphere>(point3(0.0, 0.0, -1.2), 0.5, material_center));
+    world.add(make_shared<sphere>(point3(-1.0, 0.0, -1.0), 0.5, material_left));
+    world.add(make_shared<sphere>(point3(1.0, 0.0, -1.2), 0.5, material_right));
 
     // 카메라
     camera cam;

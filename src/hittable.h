@@ -1,11 +1,14 @@
-#ifndef HITTABLE_H
+﻿#ifndef HITTABLE_H
 #define HITTABLE_H
+
+class material;
 
 // hit 정보
 class hit_record {
 public:
     point3 p; // 충돌 지점
     vec3 normal; // 충돌 지점의 법선 벡터
+    shared_ptr<material> mat; // 재질 정보를 담을 포인터
     double t; // 레이 방정식 매개변수
     bool front_face; // 레이가 바깥쪽에서 들어오는지 여부
 

@@ -12,6 +12,9 @@
 // 픽셀 간 간격은 뷰포트의 해상도 크기에 따라 결정
 // 대부분 정사각형 픽셀 기준
 
+#include "hittable.h"
+#include "material.h"
+
 class camera {
 private:
     int image_height;	    // 렌더 이미지 높이
@@ -64,17 +67,12 @@ private:
 
 	// 물체에 충돌한 경우
 	if (world.hit(r, interval(0.001, infinity), rec)) {
-	    // Simple Diffuse
-	    // 충돌 지점의 법선 벡터가 속한 반구에서 랜덤 방향의 벡터 가져옴
-	    //vec3 direction = random_on_hemisphere(rec.normal);
-	    
-	    // True Lambertian Reflection
-	    // 충돌 지점의 법선 벡터 주변으로 랜덤한 단위 벡터를 더함
-	    vec3 direction = rec.normal + random_unit_vector();
-
-	    // 충돌 지점에서 랜덤한 방향으로 다시 한 번 재귀적으로 레이 발사
-	    // 0.5를 곱해 50%의 색상만 반사되도록 함
-	    return 0.5 * ray_color(ray(rec.p, direction), depth-1, world);
+	    ray scattered;
+	    color attenuation;
+	    if (rec.mat->scatter(r, rec, attenuation, scattered)) {
+		return attenuation * ray_color(scattered, depth - 1, world);
+	    }
+	    return color(0, 0, 0);
 	}
 
 	// 물체에 충돌하지 않은 경우 배경색 그림

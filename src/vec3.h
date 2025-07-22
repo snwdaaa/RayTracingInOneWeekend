@@ -42,6 +42,12 @@ class vec3 {
             return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
         }
 
+        bool near_zero() const {
+            // 벡터가 모든 방향으로 0에 가까우면 true 리턴
+            auto s = 1e-8;
+            return (std::fabs(e[0]) < s) && (std::fabs(e[1]) < s) && (std::fabs(e[2]) < s);
+        }
+
         // 랜덤 방향 벡터 생성
         static vec3 random() {
             return vec3(random_double(), random_double(), random_double());
@@ -122,6 +128,11 @@ inline vec3 random_on_hemisphere(const vec3& normal) {
         return on_unit_sphere;
     else
         return -on_unit_sphere;
+}
+
+// 벡터 반전
+inline vec3 reflect(const vec3& v, const vec3& n) {
+    return v - 2 * dot(v, n) * n;
 }
 
 #endif
