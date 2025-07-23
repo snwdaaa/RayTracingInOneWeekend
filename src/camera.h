@@ -93,7 +93,7 @@ private:
 	    + ((i + offset.x()) * pixel_delta_u)
 	    + ((j + offset.y()) * pixel_delta_v);
 	auto ray_origin = center; // 레이 시작은 카메라 센터
-	auto ray_direction = pixel_sample - center; // 샘플링 지점으로
+	auto ray_direction = pixel_sample - ray_origin; // 샘플링 지점으로
 	return ray(ray_origin, ray_direction);
     }
 

@@ -15,7 +15,7 @@ public:
     // outward_normal은 기존에 구한 법선 벡터
     // outward_normal은 단위 벡터라고 가정
     void set_face_normal(const ray& r, const vec3& outward_normal) {
-        front_face = dot(r.direction(), outward_normal);
+        front_face = dot(r.direction(), outward_normal) < 0;
         // 항상 레이의 반대 방향으로 설정
         normal = front_face ? outward_normal : -outward_normal; // front_face면 바깥으로 나가는 방향 그대로, 아니면 반대로
     }

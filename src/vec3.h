@@ -135,4 +135,15 @@ inline vec3 reflect(const vec3& v, const vec3& n) {
     return v - 2 * dot(v, n) * n;
 }
 
+// 벡터 굴절
+// 굴절된 벡터 R'을 x와 y 성분으로 나누어 계산 후 합침
+// uv와 n 모두 단위 벡터라고 가정
+inline vec3 refract(const vec3& uv, const vec3& n, double etai_over_etat) {
+    double cos_theta = std::fmin(dot(-uv, n), 1.0); // 최솟값 1
+    vec3 r_out_perp = etai_over_etat * (uv + cos_theta * n); // 수직 성분
+    vec3 r_out_parallel = -std::sqrt(
+        std::fabs(1.0 - r_out_perp.length_squared())) * n; // 수평 성분
+    return r_out_perp + r_out_parallel; // R'
+}
+
 #endif

@@ -75,4 +75,41 @@ public:
     }
 };
 
+class dielectric : public material {
+private:
+    double refraction_index; // 진공에서의 굴절률
+public:
+    dielectric(double refraction_index) : refraction_index(refraction_index) {}
+
+    bool scatter(const ray& r_in, const hit_record& rec, color& attenuation,
+	ray& scattered
+    ) const override {
+	attenuation = color(1.0, 1.0, 1.0);
+	// 레이가 물체 안으로 들어가는지, 밖으로 나가는지에 따라
+	// 굴절률 다르게 설정
+	double ri = rec.front_face ? (1.0 / refraction_index) : refraction_index;
+	vec3 unit_direction = unit_vector(r_in.direction());
+
+	// 레이가 굴절할 수 있는지 결정
+	// 단위 벡터인 경우 u dot v = cos(theta) (theta: u와 v 사이 각도)
+	double cos_theta = std::fmin(dot(-unit_direction, rec.normal), 1.0);
+	double sin_theta = std::sqrt(1.0 - cos_theta * cos_theta);
+	vec3 direction;
+
+	if (ri * sin_theta > 1.0) { // 해가 없는 경우
+	    direction = reflect(unit_direction, rec.normal); // 전반사
+	}
+	else {
+	    direction = refract(unit_direction, rec.normal, ri); // 굴절
+	}
+
+	scattered = ray(rec.p, direction); // 굴절된 방향으로 레이 발사
+
+	// (임시) 무조건 굴절 하게 하기
+	return true;
+
+	// TODO: 매번 반사와 굴절 중 하나를 무작위로 선택
+    }
+};
+
 #endif
