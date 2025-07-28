@@ -31,6 +31,7 @@ set ( SOURCE_ONE_WEEKEND
   src/rtweekend.h
   src/sphere.h
   src/vec3.h
+  src/triangle.h
 )
 
 #set ( SOURCE_NEXT_WEEK
