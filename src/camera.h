@@ -24,6 +24,13 @@ private:
     vec3 pixel_delta_u;	    // 뷰포트 오른쪽 가리키는 벡터
     vec3 pixel_delta_v;	    // 뷰포트 아래 가리키는 벡터
 
+    // 임의의 시점(lookfrom)과 바라보는 지점(lookat), 상향 벡터(vup)가 주어지면
+    // 카메라는 자신만의 직교 정규 기저(orthonormal basis)인 u, v, w를 가짐
+    // w: 카메라의 시선 방향과 반대되는 단위 벡터. lookfrom - lookat으로 구함
+    // u: 카메라의 오른쪽을 가리키는 단위 벡터. w와 vup을 외적해 구함
+    // v: 카메라의 위쪽을 가리키는 단위 벡터. w와 u를 외적해 구함
+    vec3 u, v, w;
+
     void initialize() {
 	// 이미지 높이 계산
 	image_height = int(image_width / aspect_ratio);
@@ -32,17 +39,26 @@ private:
 	pixel_samples_scale = 1.0 / samples_per_pixel;
 
 	// 카메라 속성
-	center = point3(0, 0, 0);
-	auto focal_length = 1.0;
-	auto viewport_height = 2.0;
+	center = lookfrom;
+	auto focal_length = (lookfrom - lookat).length();
+	auto theta = degrees_to_radians(vfov);
+	// tan(theta/2) = 뷰포트 높이 절반 / focal_length이므로
+	// 뷰포트 높이 절반을 구하려면 focal_length를 곱해줘야 함
+	// viweport_height는 전체 높이이므로 2를 추가적으로 곱해줌
+	auto h = std::tan(theta / 2);
+	auto viewport_height = 2.0 * h * focal_length;
 	// viewport_height 구할 때 이론적인 aspect ratio가 아닌
 	// 이미지의 aspect ratio를 사용
 	// truncation때문에 실제 이미지의 aspect ratio와 다를 수 있기 때문
 	auto viewport_width = viewport_height * (double(image_width) / image_height);
 
+	w = unit_vector(lookfrom - lookat);
+	u = unit_vector(cross(vup, w));
+	v = cross(w, u);
+
 	// 뷰포트 엣지 수직, 수평 벡터 계산
-	auto viewport_u = vec3(viewport_width, 0, 0); // 뷰포트 엣지 수평 벡터
-	auto viewport_v = vec3(0, -viewport_height, 0); // 뷰포트 엣지 수직 벡터
+	auto viewport_u = viewport_width * u; // 뷰포트 엣지 수평 벡터
+	auto viewport_v = viewport_height * -v; // 뷰포트 엣지 수직 벡터(아래로)
 
 	// 픽셀 사이 간격
 	pixel_delta_u = viewport_u / image_width;
@@ -51,7 +67,7 @@ private:
 	// 왼쪽 위 픽셀 위치 계산
 	// 카메라 센터에서 focal_length만큼 앞으로 가서 뷰포트에 붙은 후
 	// 뷰포트 절반만큼 왼쪽으로 & 위쪽으로 이동하면 뷰포트 왼쪽 위에 위치함
-	auto viewport_upper_left = center - vec3(0, 0, focal_length)
+	auto viewport_upper_left = center - (focal_length * w)
 	    - viewport_u / 2 - viewport_v / 2;
 	// 각 픽셀 중심 -> 뷰포트 왼쪽 위에서 (u + v) 절반만큼 간 위치
 	pixel00_loc = viewport_upper_left
@@ -108,6 +124,11 @@ public:
     int image_width = 4096; // 가로 픽셀 개수
     int samples_per_pixel = 10; // 픽셀 당 랜덤 샘플 개수
     int max_depth = 10; // 레이 반사 재귀호출 최대 depth
+    double vfov = 90; // 수직 시야각 (Field of View)
+
+    point3 lookfrom; // 카메라의 위치
+    point3 lookat; // 카메라가 바라보는 곳
+    vec3 vup; // 카메라의 위쪽 방향
 
     // 렌더 준비 & 렌더 루프 실행
     void render(const hittable& world) {

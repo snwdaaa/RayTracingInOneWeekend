@@ -78,6 +78,13 @@ public:
 class dielectric : public material {
 private:
     double refraction_index; // 진공에서의 굴절률
+
+    static double reflectance(double cosine, double refraction_index) {
+	// 반사 효과 -> 슐릭 근사 사용
+	auto r0 = (1 - refraction_index) / (1 + refraction_index);
+	r0 = r0 * r0;
+	return r0 + (1 - r0) * std::pow(1 - cosine, 5);
+    }
 public:
     dielectric(double refraction_index) : refraction_index(refraction_index) {}
 
@@ -96,7 +103,9 @@ public:
 	double sin_theta = std::sqrt(1.0 - cos_theta * cos_theta);
 	vec3 direction;
 
-	if (ri * sin_theta > 1.0) { // 해가 없는 경우
+	// 해가 없는 경우 or 계산된 반사율에 따라 확률적으로 반사 또는 굴절
+	if (ri * sin_theta > 1.0 || 
+	    reflectance(cos_theta, ri) > random_double()) {
 	    direction = reflect(unit_direction, rec.normal); // 전반사
 	}
 	else {
@@ -107,8 +116,6 @@ public:
 
 	// (임시) 무조건 굴절 하게 하기
 	return true;
-
-	// TODO: 매번 반사와 굴절 중 하나를 무작위로 선택
     }
 };
 
