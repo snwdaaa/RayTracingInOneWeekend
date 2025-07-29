@@ -147,7 +147,7 @@ public:
 	#pragma omp parallel for schedule(dynamic)
 	for (int j = 0; j < image_height; j++) {
 	    // 남은 스캔 라인 표시
-	    std::clog << "\rScanlines ramaining: " << (image_height - j)
+	    std::clog << "\rScanlines remaining: " << (image_height - j)
 		<< " " << std::flush;
 	    for (int i = 0; i < image_width; i++) {
 		/* 기존 방식

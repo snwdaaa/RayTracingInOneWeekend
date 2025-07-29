@@ -7,6 +7,7 @@
 #include "image_opener.h"
 #include "camera.h"
 #include "material.h"
+#include "polygon_mesh.h"
 
 int main() {
     // 월드
@@ -15,7 +16,7 @@ int main() {
     // 물체에 사용할 머티리얼
     auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
     //auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
-    //auto material_left = make_shared<dielectric>(1.50);
+    auto material_left = make_shared<dielectric>(1.50);
     //auto material_bubble = make_shared<dielectric>(1.00 / 1.50);
     //auto material_right = make_shared<metal>(color(0.8, 0.6, 0.2), 1.0);
 
@@ -36,9 +37,10 @@ int main() {
 
     // 삼각형 테스트
     auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
-    auto material_left = make_shared<metal>(color(0.3, 0.6, 0.8), 1.0);
+    //auto material_left = make_shared<metal>(color(0.3, 0.6, 0.8), 1.0);
     auto material_right = make_shared<metal>(color(0.8, 0.6, 0.2), 0.1);
   
+    /*
     world.add(make_shared<triangle>(
 	point3(-0.5, 0.1, 0), 
 	point3(0.5, 0.1, 0),
@@ -59,6 +61,30 @@ int main() {
 	point3(1.0, 0.85, 0),
 	material_right
     ));
+    */
+
+    // 폴리곤 메시 테스트
+    std::string obj1_path = "C:/Users/kkj48/Desktop/Projects/RayTracingInOneWeekend/res/teapot.obj";
+    auto obj1 = make_shared<polygon_mesh>(
+	obj1_path,
+	material_center,
+	world,
+	point3(0, 1, 2)
+    );
+
+    auto obj2 = make_shared<polygon_mesh>(
+	obj1_path,
+	material_left,
+	world,
+	point3(-5, 1, 1.7)
+    );
+
+    auto obj3 = make_shared<polygon_mesh>(
+	obj1_path,
+	material_right,
+	world,
+	point3(5, 1, 1.7)
+    );
 
     // 카메라
     camera cam;
@@ -68,8 +94,8 @@ int main() {
     cam.max_depth = 10;
 
     cam.vfov = 90;
-    cam.lookfrom = point3(0, 0, 1);
-    cam.lookat = point3(0, 0, 0);
+    cam.lookfrom = point3(0, 5, -2);
+    cam.lookat = point3(0, 1, 10);
     cam.vup = vec3(0, 1, 0);
 
     cam.render(world); // hittable_list에 있는 모든 물체에 대해 렌더링

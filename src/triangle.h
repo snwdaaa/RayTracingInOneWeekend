@@ -8,7 +8,8 @@ private:
     point3 v0, v1, v2; // 삼각형 점 3개
     shared_ptr<material> mat;
 public:
-    triangle(point3 v0, point3 v1, point3 v2, shared_ptr<material> mat) : v0(v0), v1(v1), v2(v2), mat(mat) {}
+    triangle(point3 v0, point3 v1, point3 v2, shared_ptr<material> mat) 
+	: v0(v0), v1(v1), v2(v2), mat(mat) {}
 
     bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
 	// 엣지 벡터 2개
@@ -22,13 +23,13 @@ public:
 	double epsilon = std::numeric_limits<double>::epsilon();
 
 	// two-sided intersection routine
-	if (-epsilon < det && det < epsilon) 
-	  return false;
+	//if (-epsilon < det && det < epsilon) 
+	//  return false;
 	
 	// one-sided intersection routine
 	// 정면 삼각형만 렌더링하므로 속도 빠름
-	//if (det <= epsilon)
-	//    return false;
+	if (det <= epsilon)
+	    return false;
 
 	// u, v, t 구하기
 	// u와 v는 barycentric coordinate이므로 다음 조건을 만족해야 함
@@ -53,6 +54,8 @@ public:
 	double t = inv_det * dot(Q, edge2);
 
 	// t의 유효 범위 검사
+	// 교차점의 광선이 시작점보다 뒤에 있는 경우는 (t < 0 or t < ray_t.min)
+	// 유효한 충돌이 아님
 	if (!ray_t.contains(t))
 	    return false;
 
