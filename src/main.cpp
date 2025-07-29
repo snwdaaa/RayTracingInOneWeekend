@@ -64,34 +64,54 @@ int main() {
     */
 
     // 폴리곤 메시 테스트
-    std::string obj1_path = "C:/Users/kkj48/Desktop/Projects/RayTracingInOneWeekend/res/teapot.obj";
-    auto obj1 = make_shared<polygon_mesh>(
-	obj1_path,
+ //   std::string teapot_path = "C:/Users/kkj48/Desktop/Projects/RayTracingInOneWeekend/res/teapot.obj";
+ //   auto obj1 = make_shared<polygon_mesh>(
+	//teapot_path,
+	//material_center,
+	//world,
+	//point3(0, 1, 2),
+	//vec3(1, 1, 1)
+ //   );
+
+ //   auto obj2 = make_shared<polygon_mesh>(
+	//teapot_path,
+	//material_left,
+	//world,
+	//point3(-5, 1, 1.7),
+	//vec3(1, 1, 1)
+ //   );
+
+ //   std::string bunny_path = "C:/Users/kkj48/Desktop/Projects/RayTracingInOneWeekend/res/stanford-bunny.obj";
+ //   auto obj3 = make_shared<polygon_mesh>(
+	//bunny_path,
+	//material_right,
+	//world,
+	//point3(4, 1, 1.3),
+	//vec3(20, 20, 20)
+ //   );
+
+    // Triangle 개수에 따른 렌더 시간 테스트
+    std::string bunny_path = "C:/Users/kkj48/Desktop/Projects/RayTracingInOneWeekend/res/stanford-bunny.obj";
+    std::string bunny_path_08 = "C:/Users/kkj48/Desktop/Projects/RayTracingInOneWeekend/res/stanford-bunny-08.obj";
+    std::string bunny_path_06 = "C:/Users/kkj48/Desktop/Projects/RayTracingInOneWeekend/res/stanford-bunny-06.obj";
+    std::string bunny_path_04 = "C:/Users/kkj48/Desktop/Projects/RayTracingInOneWeekend/res/stanford-bunny-04.obj";
+    std::string bunny_path_02 = "C:/Users/kkj48/Desktop/Projects/RayTracingInOneWeekend/res/stanford-bunny-02.obj";
+    std::string bunny_path_01 = "C:/Users/kkj48/Desktop/Projects/RayTracingInOneWeekend/res/stanford-bunny-01.obj";
+
+    auto bunny_test = make_shared<polygon_mesh>(
+	bunny_path_06,
 	material_center,
 	world,
-	point3(0, 1, 2)
-    );
-
-    auto obj2 = make_shared<polygon_mesh>(
-	obj1_path,
-	material_left,
-	world,
-	point3(-5, 1, 1.7)
-    );
-
-    auto obj3 = make_shared<polygon_mesh>(
-	obj1_path,
-	material_right,
-	world,
-	point3(5, 1, 1.7)
+	point3(0, 1, 1.3),
+	vec3(20, 20, 20)
     );
 
     // 카메라
     camera cam;
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 2048;
-    cam.samples_per_pixel = 10;
-    cam.max_depth = 10;
+    cam.samples_per_pixel = 4;
+    cam.max_depth = 5;
 
     cam.vfov = 90;
     cam.lookfrom = point3(0, 5, -2);

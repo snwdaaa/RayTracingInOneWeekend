@@ -38,13 +38,13 @@ public:
 	
 	double inv_det = 1.0 / det;
 	vec3 T = r.origin() - v0;
-	vec3 Q = cross(T, edge1);
 	double u = inv_det * dot(P, T);
 
 	// u의 유효 범위 검사
 	if (u < 0 || u > 1) 
 	    return false;
 
+	vec3 Q = cross(T, edge1);
 	double v = inv_det * dot(Q, r.direction());
 
 	// v의 유효 범위 검사

@@ -9,12 +9,13 @@ private:
     std::vector<shared_ptr<triangle>> triangles; // 삼각형 면 배열
     std::shared_ptr<material> mat; // 머티리얼
     point3 pos; // 위치
+    vec3 scale; // 스케일
 public:
     // 생성자 - 모델 경로 받고 바로 파싱해서 정점 정보를 배열에 저장 후
     // hittable_list에 추가
     polygon_mesh(std::string& modelPath, const shared_ptr<material> mat,
-	 hittable_list& world, const point3& pos)
-	: modelPath(modelPath), mat(mat), pos(pos)
+	 hittable_list& world, const point3& pos, const vec3& scale)
+	: modelPath(modelPath), mat(mat), pos(pos), scale(scale)
     {
 	parse_obj();
 	make_triangles();
@@ -62,9 +63,9 @@ public:
 		ss >> x >> y >> z;
 		vertices.push_back(point3(
 		    // 지정된 좌표 값을 더함
-		    x - pos.x(),
-		    y + pos.y(), 
-		    z + pos.z()
+		    (x * scale.x()) - pos.x(),
+		    (y * scale.y()) + pos.y(), 
+		    (z * scale.z()) + pos.z()
 		));
 		//std::clog << "Vertex -> x: " << x + pos.x() << ", y: " << y + pos.y() << ", z: " << z + pos.z() << "\n";
 	    }
