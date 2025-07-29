@@ -20,13 +20,15 @@ public:
 	// 레이가 삼각형 평면에 평행하다면 바로 false
 	// 부동 소수점 오차를 줄이기 위해 epsilon 값 사용
 	double epsilon = std::numeric_limits<double>::epsilon();
+
 	// two-sided intersection routine
-	//if (-epsilon < det && det < epsilon) 
-	//  return false;
+	if (-epsilon < det && det < epsilon) 
+	  return false;
 	
 	// one-sided intersection routine
-	if (det <= epsilon)
-	    return false;
+	// 정면 삼각형만 렌더링하므로 속도 빠름
+	//if (det <= epsilon)
+	//    return false;
 
 	// u, v, t 구하기
 	// u와 v는 barycentric coordinate이므로 다음 조건을 만족해야 함
@@ -50,10 +52,15 @@ public:
 
 	double t = inv_det * dot(Q, edge2);
 
+	// t의 유효 범위 검사
+	if (!ray_t.contains(t))
+	    return false;
+
 	// rec에 충돌 정보 담아서 리턴
 	rec.t = t;
 	rec.p = r.at(rec.t);
 	rec.mat = mat;
+
 	// 삼각형의 법선 벡터 -> 두 엣지 벡터 외적
 	vec3 outward_normal = unit_vector(cross(edge1, edge2));
 	rec.set_face_normal(r, outward_normal);
