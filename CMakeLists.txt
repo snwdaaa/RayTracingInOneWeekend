@@ -33,6 +33,8 @@ set ( SOURCE_ONE_WEEKEND
   src/vec3.h
   src/triangle.h
   src/polygon_mesh.h
+  src/aabb.h
+  src/bvh.h
 )
 
 #set ( SOURCE_NEXT_WEEK

@@ -7,9 +7,30 @@ class triangle : public hittable {
 private:
     point3 v0, v1, v2; // 삼각형 점 3개
     shared_ptr<material> mat;
+    aabb bbox;
 public:
     triangle(point3 v0, point3 v1, point3 v2, shared_ptr<material> mat) 
-	: v0(v0), v1(v1), v2(v2), mat(mat) {}
+	: v0(v0), v1(v1), v2(v2), mat(mat) 
+    {
+	// bbox 계산
+	// x, y, z 길이 -> 세 정점 각 성분의 min, max -> interval 구하기
+	auto x = interval(std::min({ v0.x(), v1.x(), v2.x() }),
+	    std::max({ v0.x(), v1.x(), v2.x() }));
+	auto y = interval(std::min({ v0.y(), v1.y(), v2.y() }),
+	    std::max({ v0.y(), v1.y(), v2.y() }));
+	auto z = interval(std::min({ v0.z(), v1.z(), v2.z() }),
+	    std::max({ v0.z(), v1.z(), v2.z() }));
+
+	double delta = 0.0001;
+	if (x.size() < delta)
+	    x = x.expand(delta);
+	if (y.size() < delta)
+	    y = y.expand(delta);
+	if (z.size() < delta)
+	    z = z.expand(delta);
+
+	bbox = aabb(x, y, z);
+    }
 
     bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
 	// 엣지 벡터 2개
@@ -69,6 +90,10 @@ public:
 	rec.set_face_normal(r, outward_normal);
 
 	return true;
+    }
+
+    aabb bounding_box() const override {
+	return bbox;
     }
 };
 

@@ -10,6 +10,7 @@
 #include <sstream>
 #include <chrono>
 #include <vector>
+#include <algorithm>
 
 // C++ std usings
 
@@ -36,6 +37,11 @@ inline double random_double() {
 inline double random_double(double min, double max) {
     // [min, max)에서 랜덤한 실수 리턴
     return min + (max - min) * random_double();
+}
+
+inline int random_int(int min, int max) {
+    // [min, max]에서 랜덤한 정수 리턴
+    return min + (std::rand() % (max - min + 1));
 }
 
 // Common Header

@@ -6,7 +6,13 @@ class interval {
 	double min, max;
 
 	interval() : min(+infinity), max(-infinity) {}
+
 	interval(double min, double max) : min(min), max(max) {}
+
+	interval(const interval& a, const interval& b) {
+	    min = (a.min <= b.min) ? a.min : b.min;
+	    max = (a.max >= b.max) ? a.max : b.max;
+	}
 
 	// 구간 크기
 	double size() const {
@@ -29,6 +35,12 @@ class interval {
 	    if (x < min) return min;
 	    if (x > max) return max;
 	    return x;
+	}
+
+	// 구간의 범위를 delta만큼 증가 -> 양 끝을 delta/2만큼 늘림
+	interval expand(double delta) const {
+	    double padding = delta / 2.0f;
+	    return interval(min - padding, max + padding);
 	}
 
 	static const interval empty, universe;
