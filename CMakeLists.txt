@@ -35,6 +35,8 @@ set ( SOURCE_ONE_WEEKEND
   src/polygon_mesh.h
   src/aabb.h
   src/bvh.h
+  src/scene_info.h
+  src/scene_info.cpp
 )
 
 #set ( SOURCE_NEXT_WEEK

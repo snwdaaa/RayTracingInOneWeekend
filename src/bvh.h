@@ -11,8 +11,6 @@ private:
     shared_ptr<hittable> left;
     shared_ptr<hittable> right;
 
-    // axis를 기준으로 두 객체의 AABB 중심 비교
-
 public:
     // hittable_list를 implicit하게 복사하는 생성자
     bvh_node(hittable_list list) 
@@ -74,14 +72,15 @@ public:
 	    temp_bbox = aabb(temp_bbox, objects[i]->bounding_box());
 
 	// 임시 bbox로 가장 긴 축 찾기
-	unsigned int longest_axis = temp_bbox.get_longest_axis(); // x(0), y(1), z(2)
+	// x(0), y(1), z(2)
+	unsigned int longest_axis = temp_bbox.get_longest_axis();
 
 	// 가장 긴 축을 기준으로 오브젝트 정렬
 	// hittable 객체의 bounding_box() 메서드로 aabb 객체를 가져온 후
 	// aabb 객체의 get_axis_interval() 메서드로 가장 긴 축의 interval을 가져옴
 	// 그리고 그 interval의 min을 기준으로 정렬
-	auto interval_comp = [&](
-	    shared_ptr<hittable> obj_a, // 람다 표현식
+	auto interval_comp = [&]( // 람다 표현식
+	    shared_ptr<hittable> obj_a,
 	    shared_ptr<hittable> obj_b
 	)
 	{

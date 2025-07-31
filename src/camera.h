@@ -82,7 +82,7 @@ private:
 	hit_record rec;
 
 	// 물체에 충돌한 경우
-	if (world.hit(r, interval(0.001, infinity), rec)) {
+	if (world.hit(r, interval(0.0001, infinity), rec)) {
 	    ray scattered;
 	    color attenuation;
 	    if (rec.mat->scatter(r, rec, attenuation, scattered)) {

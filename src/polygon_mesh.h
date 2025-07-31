@@ -63,7 +63,7 @@ public:
 		ss >> x >> y >> z;
 		vertices.push_back(point3(
 		    // 지정된 좌표 값을 더함
-		    (x * scale.x()) - pos.x(),
+		    (x * scale.x()) + pos.x(),
 		    (y * scale.y()) + pos.y(), 
 		    (z * scale.z()) + pos.z()
 		));
@@ -87,6 +87,10 @@ public:
 	for (auto tri : triangles) {
 	    world.add(tri);
 	}
+
+	// Scene Info 업데이트
+	scene_info::vertices += vertices.size();
+	scene_info::faces += triangles.size();
     }
 };
 
