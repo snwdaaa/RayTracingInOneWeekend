@@ -148,22 +148,8 @@ public:
 	for (int j = 0; j < image_height; j++) {
 	    // 남은 스캔 라인 표시
 	    std::clog << "\rScanlines remaining: " << (image_height - j)
-		<< " " << std::flush;
+		<< " / " << image_height << " " << std::flush;
 	    for (int i = 0; i < image_width; i++) {
-		/* 기존 방식
-		// 이미지 좌표계를 월드 좌표계로 변환
-		// i와 j에 뷰포트의 각 셀 간격 곱하기
-		auto pixel_center = pixel00_loc + (i * pixel_delta_u)
-		    + (j * pixel_delta_v);
-		// 카메라 센터에서 각 픽셀 센터로 발사하는 레이 방향
-		auto ray_direction = pixel_center - center;
-		// 카메라 센터에서 각 픽셀로 가는 레이 생성
-		ray r(center, ray_direction);
-		// 레이 발사해서 픽셀 컬러 가져오기
-		color pixel_color = ray_color(r, world);
-		images[j * image_width + i] = pixel_color;
-		*/
-
 		color pixel_color(0, 0, 0);
 		for (int sample = 0; sample < samples_per_pixel; sample++) {
 		    ray r = get_ray(i, j); // 픽셀 정사각형 내에서 랜덤 샘플링
