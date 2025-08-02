@@ -3,7 +3,7 @@
 
 class scene_info {
 public:
-    static int vertices;
-    static int faces;
+    static size_t vertices;
+    static size_t faces;
 };
 #endif

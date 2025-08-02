@@ -67,7 +67,7 @@ public:
 	    const double& ray_dir_axis_inv = 1.0 / ray_dir[axis];
 
 	    // (x0 - Qx) / dx
-	    auto t0 = (axis_interval.min - ray_start[axis]) * ray_dir_axis_inv;
+	    t0 = (axis_interval.min - ray_start[axis]) * ray_dir_axis_inv;
 	    // (x1 - Qx) / dx
 	    t1 = (axis_interval.max - ray_start[axis]) * ray_dir_axis_inv;
 

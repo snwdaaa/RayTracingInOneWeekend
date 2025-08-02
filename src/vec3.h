@@ -104,6 +104,15 @@ inline vec3 unit_vector(const vec3& v) {
     return v / v.length();
 }
 
+// 1x1 직사각형에서 원 범위 안에 들어오는 랜덤 벡터 생성
+inline vec3 random_in_unit_disk() {
+    while (true) {
+        auto p = vec3(random_double(-1, 1), random_double(-1, 1), 0);
+        if (p.length_squared() < 1)
+            return p;
+    }
+}
+
 // 단위원을 감싸는 큐브 내에서 랜덤한 벡터 생성
 // 단위원 안에 있다면 accept -> normalize
 // 단위원 밖에 있다면 reject

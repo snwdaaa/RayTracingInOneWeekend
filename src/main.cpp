@@ -233,6 +233,8 @@ void cornell_box(hittable_list& world, camera& cam) {
 
     cam.lookfrom = point3(0, 0, 3);
     cam.lookat = point3(0, 0, 0);
+
+    cam.defocus_angle = 0; // disable DOF
 }
 
 int main() {
@@ -240,13 +242,16 @@ int main() {
     camera cam;
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 2048;
-    cam.samples_per_pixel = 100;
+    cam.samples_per_pixel = 10;
     cam.max_depth = 10;
 
     cam.vfov = 70;
     cam.lookfrom = point3(0, 5, 20); // scene 5
     cam.lookat = point3(0, 4, 0);
     cam.vup = vec3(0, 1, 0);
+
+    cam.defocus_angle = 10.0;
+    cam.focus_dist = 3;
 
     // 월드
     hittable_list world; // 모든 hittable한 오브젝트를 저장

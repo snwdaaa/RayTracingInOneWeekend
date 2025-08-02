@@ -31,6 +31,9 @@ private:
     // v: 카메라의 위쪽을 가리키는 단위 벡터. w와 u를 외적해 구함
     vec3 u, v, w;
 
+    vec3 defocus_disk_u;    // Defocus 디스크 가로 반지름
+    vec3 defocus_disk_v;    // Defocus 디스크 세로 반지름
+
     void initialize() {
 	// 이미지 높이 계산
 	image_height = int(image_width / aspect_ratio);
@@ -40,13 +43,15 @@ private:
 
 	// 카메라 속성
 	center = lookfrom;
-	auto focal_length = (lookfrom - lookat).length();
+	//auto focal_length = (lookfrom - lookat).length();
 	auto theta = degrees_to_radians(vfov);
 	// tan(theta/2) = 뷰포트 높이 절반 / focal_length이므로
 	// 뷰포트 높이 절반을 구하려면 focal_length를 곱해줘야 함
 	// viweport_height는 전체 높이이므로 2를 추가적으로 곱해줌
 	auto h = std::tan(theta / 2);
-	auto viewport_height = 2.0 * h * focal_length;
+	//auto viewport_height = 2.0 * h * focal_length;
+	auto viewport_height = 2.0 * h * focus_dist;
+
 	// viewport_height 구할 때 이론적인 aspect ratio가 아닌
 	// 이미지의 aspect ratio를 사용
 	// truncation때문에 실제 이미지의 aspect ratio와 다를 수 있기 때문
@@ -67,11 +72,17 @@ private:
 	// 왼쪽 위 픽셀 위치 계산
 	// 카메라 센터에서 focal_length만큼 앞으로 가서 뷰포트에 붙은 후
 	// 뷰포트 절반만큼 왼쪽으로 & 위쪽으로 이동하면 뷰포트 왼쪽 위에 위치함
-	auto viewport_upper_left = center - (focal_length * w)
+	auto viewport_upper_left = center - (focus_dist * w)
 	    - viewport_u / 2 - viewport_v / 2;
 	// 각 픽셀 중심 -> 뷰포트 왼쪽 위에서 (u + v) 절반만큼 간 위치
 	pixel00_loc = viewport_upper_left
 	    + 0.5 * (pixel_delta_u + pixel_delta_v);
+
+	// 카메라 defocus 디스크 가로, 세로 반지름 계산
+	auto defocus_radius = focus_dist * std::tan(degrees_to_radians(
+	    defocus_angle / 2));
+	defocus_disk_u = u * defocus_radius;
+	defocus_disk_v = v * defocus_radius;
     }
 
     color ray_color(const ray& r, int depth, const hittable& world) const {
@@ -108,7 +119,10 @@ private:
 	auto pixel_sample = pixel00_loc
 	    + ((i + offset.x()) * pixel_delta_u)
 	    + ((j + offset.y()) * pixel_delta_v);
-	auto ray_origin = center; // 레이 시작은 카메라 센터
+	//auto ray_origin = center; // 레이 시작은 카메라 센터
+	// defocus angle이 0이면 핀홀 방식 -> 항상 선명한 이미지
+	// 1 초과하면 레이 시작 지점이 렌즈 디스크 임의의 한 점
+	auto ray_origin = (defocus_angle <= 0) ? center : defocus_disk_sample();
 	auto ray_direction = pixel_sample - ray_origin; // 샘플링 지점으로
 	return ray(ray_origin, ray_direction);
     }
@@ -116,6 +130,12 @@ private:
     vec3 sample_square() const {
 	// [-0.5, +0.5] 범위의 x, y 값을 가지는 벡터 리턴
 	return vec3(random_double() - 0.5, random_double() - 0.5, 0);
+    }
+
+    point3 defocus_disk_sample() const {
+	// 카메라 defocus 디스크에서 랜덤 포인트 리턴
+	auto p = random_in_unit_disk();
+	return center + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);
     }
 public:
     const std::string outputFilename = "image.ppm";
@@ -129,6 +149,11 @@ public:
     point3 lookfrom; // 카메라의 위치
     point3 lookat; // 카메라가 바라보는 곳
     vec3 vup; // 카메라의 위쪽 방향
+
+    // 디스크의 크기를 조절하는 각도
+    // 값이 클 수록 조리개가 커져 블러 강해짐
+    double defocus_angle = 0;
+    double focus_dist = 10; // 카메라에서 focus plane까지 거리
 
     // 렌더 준비 & 렌더 루프 실행
     void render(const hittable& world) {
